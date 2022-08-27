@@ -1,7 +1,22 @@
-import React from 'react'
-import { View, Text, SafeAreaView, StyleSheet } from 'react-native'
+import React, { useState } from 'react'
+import { 
+  View,
+  Text, 
+  SafeAreaView, 
+  Image, 
+  StyleSheet, 
+  KeyboardAvoidingView, 
+  Pressable 
+} from 'react-native'
+
+import CreateTodoModal from '../components/CreateTodoModal'
+import DimBackground from '../components/DimBackground'
+
+import PlusSign from '../assets/images/plus-sign.png'
 
 const Home = () => {
+  const [isVisible, setIsVisible] = useState(false)
+
   function getFormattedDate() {
     const date = new Date()
 
@@ -12,14 +27,29 @@ const Home = () => {
     return `${monthString} ${dayNumber}, ${yearNumber}`
   }
 
+  function openModal() {
+    setIsVisible(true)
+  }
+
+  function closeModal() {
+    setIsVisible(false)
+  }
+
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <DimBackground isVisible={isVisible} />
+      <CreateTodoModal closeModal={closeModal} isVisible={isVisible} />
       <View style={styles.headerContainer}>
         <Text style={styles.dateText}>{getFormattedDate()}</Text>
       </View>
       <View style={styles.mainContent}>
         <Text style={styles.todoGroupTitle}>Incomplete</Text>
       </View>
+      <KeyboardAvoidingView>
+        <Pressable android_ripple={{ color: '#5A70E9', borderless: true, radius: 30 }} onPress={openModal} style={styles.floatingButton}>
+          <Image source={PlusSign} />
+        </Pressable>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -32,8 +62,8 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    borderTopWidth: 1,
-    borderColor: '#D0D0D0',
+    borderTopWidth: 2,
+    borderColor: '#E8E8E8',
     margin: 20
   },
   headerContainer: {
@@ -46,9 +76,24 @@ const styles = StyleSheet.create({
     color: '#0E0E11'
   },
   todoGroupTitle: {
+    marginTop: 15,
     color: '#575767',
     fontWeight: '700',
     fontSize: 18
+  },
+  floatingButton: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    backgroundColor: '#3F4EA0',
+    bottom: 15,
+    right: 15,
+    borderWidth: 2,
+    borderColor: '#515CC6',
+    borderRadius: 30
   }
 })
 
