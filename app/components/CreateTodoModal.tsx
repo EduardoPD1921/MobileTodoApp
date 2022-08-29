@@ -7,12 +7,12 @@ import {
   Dimensions,
   Image,
   TouchableWithoutFeedback,
-  TouchableHighlight,
   TextInput,
-  Pressable
+  Pressable,
+  Button
 } from 'react-native'
 
-import CloseSign from '../assets/images/close-sign.png'
+import EvilIcon from 'react-native-vector-icons/EvilIcons'
 
 type Props = {
   isVisible: boolean,
@@ -20,13 +20,16 @@ type Props = {
 }
 
 const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
+  const {  width, height } = Dimensions.get('window')
+
   return (
     <Modal transparent={true} onRequestClose={closeModal} animationType='slide' visible={isVisible}>
+      <TouchableWithoutFeedback touchSoundDisabled={true} onPress={closeModal}>
+        <View style={{ width, height }} />
+      </TouchableWithoutFeedback>
       <View style={styles.popupContainer}>
         <View style={styles.modalHeader}>
-          <TouchableWithoutFeedback onPress={closeModal}>
-            <Image style={styles.closeImage} source={CloseSign} />
-          </TouchableWithoutFeedback>
+          <EvilIcon onPress={closeModal} size={20} name='close' />
           <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitleText}>Create to-do</Text>
           </View>
@@ -37,17 +40,12 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
             <TextInput style={styles.input} />
           </View>
           <View style={styles.inputContainer}>
-            <Text style={[styles.labelText, { marginBottom: 20 }]}>Description</Text>
-            <View style={styles.emojiButtonContainer}>
-              <TouchableHighlight style={styles.emojiButton}>
-                <Text style={styles.buttonText}>Emoji</Text>
-              </TouchableHighlight>
-              <TextInput style={[styles.input, { flex: 10 }]} />
-            </View>
+            <Text style={[styles.labelText, { marginBottom: 20 }]}>Tag</Text>
+            <TextInput style={styles.input} />
           </View>
-          <Pressable style={styles.button}>
-            <Text>Create</Text>
-          </Pressable>
+        </View>
+        <View style={[styles.createButton, { width }]}>
+          <Button color='#5A70E9' title='Create' />
         </View>
       </View>
     </Modal>
@@ -58,11 +56,14 @@ const styles = StyleSheet.create({
   popupContainer: {
     backgroundColor: '#F8F8F8',
     position: 'absolute',
-    height: 400,
+    height: 380,
     width: Dimensions.get('window').width,
     bottom: 0,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30
+  },
+  closeContainer: {
+    position: 'absolute',
   },
   modalHeader: {
     display: 'flex',
@@ -102,19 +103,15 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row'
   },
-  emojiButton: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#515CC6',
-    borderRadius: 10,
-    flex: 2,
-  },
   buttonText: {
     color: 'white'
   },
   inputContainer: {
     marginBottom: 20
+  },
+  createButton: {
+    position: 'absolute',
+    bottom: 0
   }
 })
 
