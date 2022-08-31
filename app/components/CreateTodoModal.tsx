@@ -1,16 +1,17 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import {
   View,
   Text,
   Modal,
   StyleSheet,
   Dimensions,
-  Image,
   TouchableWithoutFeedback,
   TextInput,
-  Pressable,
   Button
 } from 'react-native'
+import { Todo } from '../types'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import EvilIcon from 'react-native-vector-icons/EvilIcons'
 
@@ -22,14 +23,45 @@ type Props = {
 const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
   const {  width, height } = Dimensions.get('window')
 
+  const todoData = useRef({
+    name: '',
+    tag: '',
+    isCompleted: false
+  })  
+
+  async function saveTodo() {
+    const currenTodosJson = await AsyncStorage.getItem('todos')
+
+    if (currenTodosJson) {
+      const currentTodosParsed: Array<Todo> = JSON.parse(currenTodosJson)
+      currentTodosParsed.push(todoData.current)
+
+      await AsyncStorage.setItem('todos', JSON.stringify(currentTodosParsed))
+    } else {
+      await AsyncStorage.setItem('todos', JSON.stringify([todoData.current]))
+    }
+
+    cleanInputsAndClose()
+  }
+
+  function cleanInputsAndClose() {
+    todoData.current = {
+      name: '',
+      tag: '',
+      isCompleted: false
+    }
+
+    closeModal()
+  }
+
   return (
-    <Modal transparent={true} onRequestClose={closeModal} animationType='slide' visible={isVisible}>
-      <TouchableWithoutFeedback touchSoundDisabled={true} onPress={closeModal}>
+    <Modal transparent={true} onRequestClose={cleanInputsAndClose} animationType='slide' visible={isVisible}>
+      <TouchableWithoutFeedback touchSoundDisabled={true} onPress={cleanInputsAndClose}>
         <View style={{ width, height }} />
       </TouchableWithoutFeedback>
       <View style={styles.popupContainer}>
         <View style={styles.modalHeader}>
-          <EvilIcon onPress={closeModal} size={20} name='close' />
+          <EvilIcon color='black' onPress={cleanInputsAndClose} size={20} name='close' />
           <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitleText}>Create to-do</Text>
           </View>
@@ -37,15 +69,15 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
         <View style={styles.inputsContainer}>
           <View style={styles.inputContainer}>
             <Text style={[styles.labelText, { marginBottom: 10 }]}>Name</Text>
-            <TextInput style={styles.input} />
+            <TextInput onChangeText={c => todoData.current.name = c} style={styles.input} />
           </View>
           <View style={styles.inputContainer}>
-            <Text style={[styles.labelText, { marginBottom: 20 }]}>Tag</Text>
-            <TextInput style={styles.input} />
+            <Text style={[styles.labelText, { marginBottom: 10 }]}>Tag</Text>
+            <TextInput onChangeText={c => todoData.current.tag = c} style={styles.input} />
           </View>
         </View>
         <View style={[styles.createButton, { width }]}>
-          <Button color='#5A70E9' title='Create' />
+          <Button onPress={saveTodo} color='#5A70E9' title='Create' />
         </View>
       </View>
     </Modal>
@@ -79,7 +111,8 @@ const styles = StyleSheet.create({
   },
   headerTitleText: {
     fontWeight: 'bold',
-    fontSize: 20
+    fontSize: 20,
+    color: '#727272'
   },
   inputsContainer: {
     margin: 20
@@ -93,7 +126,8 @@ const styles = StyleSheet.create({
     marginTop: 30
   },
   labelText: {
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: '#727272'
   },
   closeImage: {
     width: 10,

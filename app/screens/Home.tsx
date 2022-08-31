@@ -6,8 +6,11 @@ import {
   Image, 
   StyleSheet, 
   KeyboardAvoidingView, 
-  Pressable 
+  Pressable, 
+  Button
 } from 'react-native'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import CreateTodoModal from '../components/CreateTodoModal'
 import DimBackground from '../components/DimBackground'
@@ -20,7 +23,7 @@ const Home = () => {
   function getFormattedDate() {
     const date = new Date()
 
-    const monthString = date.toLocaleString('default', { month: 'long' })
+    const monthString = date.toLocaleString('eng-US', { month: 'long' })
     const dayNumber = date.getDate()
     const yearNumber = date.getFullYear()
 
@@ -33,6 +36,11 @@ const Home = () => {
 
   function closeModal() {
     setIsVisible(false)
+  }
+
+  async function test() {
+    const test = await AsyncStorage.getItem('todos')
+    console.log(test)
   }
 
   return (
@@ -50,6 +58,7 @@ const Home = () => {
           <Image source={PlusSign} />
         </Pressable>
       </KeyboardAvoidingView>
+      <Button onPress={test} title='teste' />
     </SafeAreaView>
   )
 }
