@@ -7,7 +7,8 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   TextInput,
-  Button
+  Button,
+  ToastAndroid
 } from 'react-native'
 import { Todo } from '../types'
 
@@ -42,6 +43,8 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
     }
 
     cleanInputsAndClose()
+
+    ToastAndroid.show('To-do created!', ToastAndroid.SHORT)
   }
 
   function cleanInputsAndClose() {
