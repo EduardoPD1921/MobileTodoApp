@@ -6,7 +6,8 @@ import {
   Image, 
   StyleSheet, 
   KeyboardAvoidingView, 
-  Pressable
+  Pressable,
+  ScrollView
 } from 'react-native'
 
 import { Todo } from '../types'
@@ -14,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import CreateTodoModal from '../components/CreateTodoModal'
 import DimBackground from '../components/DimBackground'
+import TodoItem from '../components/TodoItem'
 
 import PlusSign from '../assets/images/plus-sign.png'
 
@@ -62,6 +64,12 @@ const Home = () => {
     return `${monthString} ${dayNumber}, ${yearNumber}`
   }
 
+  function renderIncompleteList() {
+    return todos.map(todo => {
+      return <TodoItem key={`${todo.name}-${todo.tag}`} name={todo.name} tag={todo.tag} isCompleted={todo.isCompleted} />
+    })
+  }
+
   function openModal() {
     setIsVisible(true)
   }
@@ -80,6 +88,9 @@ const Home = () => {
       </View>
       <View style={styles.mainContent}>
         <Text style={styles.todoGroupTitle}>Incomplete</Text>
+        <ScrollView>
+          {renderIncompleteList()}
+        </ScrollView>
       </View>
       <KeyboardAvoidingView>
         <Pressable android_ripple={{ color: '#5A70E9', borderless: true, radius: 30 }} onPress={openModal} style={styles.floatingButton}>
@@ -107,14 +118,14 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   dateText: {
+    fontFamily: 'Inter-Bold',
     fontSize: 30,
-    fontWeight: 'bold',
     color: '#0E0E11'
   },
   todoGroupTitle: {
+    fontFamily: 'Inter-Bold',
     marginTop: 15,
     color: '#575767',
-    fontWeight: '700',
     fontSize: 18
   },
   floatingButton: {
@@ -132,9 +143,9 @@ const styles = StyleSheet.create({
     borderRadius: 30
   },
   counterText: {
+    fontFamily: 'Inter-SemiBold',
     fontSize: 14,
     color: '#575767',
-    fontWeight: '700',
     marginTop: 5
   }
 })
