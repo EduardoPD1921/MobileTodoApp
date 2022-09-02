@@ -7,8 +7,10 @@ import {
   StyleSheet, 
   KeyboardAvoidingView, 
   Pressable,
-  ScrollView
+  SectionList
 } from 'react-native'
+
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
 import { Todo } from '../types'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -64,10 +66,48 @@ const Home = () => {
     return `${monthString} ${dayNumber}, ${yearNumber}`
   }
 
-  function renderIncompleteList() {
-    return todos.map(todo => {
-      return <TodoItem key={`${todo.name}-${todo.tag}`} name={todo.name} tag={todo.tag} isCompleted={todo.isCompleted} />
+  function getGroupedTodos() {
+    let incompleteTodo: Array<Todo> = []
+    let completedTodo: Array<Todo> = []
+
+    todos.forEach(todo => {
+      if (todo.isCompleted) {
+        completedTodo.push(todo)
+      } else {
+        incompleteTodo.push(todo)
+      }
     })
+
+    const data = [
+      {
+        title: 'Incompleted',
+        data: incompleteTodo
+      },
+      {
+        title: 'Completed',
+        data: completedTodo
+      }
+    ]
+
+    return data
+  }
+
+  function renderSectionList() {
+    if (todos.length > 0) {
+      return (
+        <Animated.View entering={FadeInDown}>
+          <SectionList
+            sections={getGroupedTodos()}
+            keyExtractor={item => `${item.name}-${item.tag}`}
+            stickySectionHeadersEnabled={true}
+            renderItem={({ item }) => <TodoItem name={item.name} tag={item.tag} isCompleted={item.isCompleted} />} 
+            renderSectionHeader={({ section: { title } }) => (
+              <Text style={styles.todoGroupTitle}>{title}</Text>
+            )}
+          />
+        </Animated.View>
+      )
+    }
   }
 
   function openModal() {
@@ -87,10 +127,7 @@ const Home = () => {
         <Text style={styles.counterText}>{qtdIncompletedTodos} incomplete, {qtdCompletedTodos} completed</Text>
       </View>
       <View style={styles.mainContent}>
-        <Text style={styles.todoGroupTitle}>Incomplete</Text>
-        <ScrollView>
-          {renderIncompleteList()}
-        </ScrollView>
+        {renderSectionList()}
       </View>
       <KeyboardAvoidingView>
         <Pressable android_ripple={{ color: '#5A70E9', borderless: true, radius: 30 }} onPress={openModal} style={styles.floatingButton}>
@@ -111,7 +148,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderTopWidth: 2,
     borderColor: '#E8E8E8',
-    margin: 20
+    margin: 20,
+    marginBottom: 0
   },
   headerContainer: {
     marginTop: 30,
@@ -124,9 +162,11 @@ const styles = StyleSheet.create({
   },
   todoGroupTitle: {
     fontFamily: 'Inter-Bold',
-    marginTop: 15,
     color: '#575767',
-    fontSize: 18
+    fontSize: 18,
+    backgroundColor: '#F8F8F8',
+    paddingTop: 10,
+    paddingBottom: 5
   },
   floatingButton: {
     display: 'flex',

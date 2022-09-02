@@ -72,11 +72,11 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
         <View style={styles.inputsContainer}>
           <View style={styles.inputContainer}>
             <Text style={[styles.labelText, { marginBottom: 10 }]}>Name</Text>
-            <TextInput onChangeText={c => todoData.current.name = c} style={styles.input} />
+            <TextInput selectionColor='#727272' onChangeText={c => todoData.current.name = c} style={styles.input} />
           </View>
           <View style={styles.inputContainer}>
             <Text style={[styles.labelText, { marginBottom: 10 }]}>Tag</Text>
-            <TextInput onChangeText={c => todoData.current.tag = c} style={styles.input} />
+            <TextInput selectionColor='#727272' onChangeText={c => todoData.current.tag = c} style={styles.input} />
           </View>
         </View>
         <View style={[styles.createButton, { width }]}>
@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     margin: 20
   },
   input: {
+    color: 'black',
     borderColor: '#E5E5E5',
     borderBottomWidth: 1
   },
