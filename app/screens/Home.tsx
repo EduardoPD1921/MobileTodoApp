@@ -7,10 +7,12 @@ import {
   StyleSheet, 
   KeyboardAvoidingView, 
   Pressable,
-  SectionList
+  SectionList,
+  NativeScrollEvent,
+  NativeSyntheticEvent
 } from 'react-native'
 
-import Animated, { FadeInDown } from 'react-native-reanimated'
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 import { Todo } from '../types'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -21,11 +23,23 @@ import TodoItem from '../components/TodoItem'
 
 import PlusSign from '../assets/images/plus-sign.png'
 
+type OnScrollEventHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => void
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+
 const Home = () => {
   const [todos, setTodos] = useState<Array<Todo>>([])
   const [qtdCompletedTodos, setQtdCompletedTodos] = useState<number | null>(null)
   const [qtdIncompletedTodos, setQtdIncompletedTodos] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+
+  const fabBottomAnimation = useSharedValue(15)
+
+  const fabAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      bottom: fabBottomAnimation.value
+    }
+  })
 
   useEffect(() => {
     const getTodosAndQty = async () => {
@@ -59,7 +73,7 @@ const Home = () => {
   function getFormattedDate() {
     const date = new Date()
 
-    const monthString = date.toLocaleString('eng-US', { month: 'long' })
+    const monthString = date.toLocaleString('en-US', { month: 'long' })
     const dayNumber = date.getDate()
     const yearNumber = date.getFullYear()
 
@@ -97,6 +111,7 @@ const Home = () => {
       return (
         <Animated.View entering={FadeInDown}>
           <SectionList
+            onScroll={onScrollHandler}
             sections={getGroupedTodos()}
             keyExtractor={item => `${item.name}-${item.tag}`}
             stickySectionHeadersEnabled={true}
@@ -107,6 +122,28 @@ const Home = () => {
           />
         </Animated.View>
       )
+    }
+  }
+
+  function hideFloatingActionButton() {
+    fabBottomAnimation.value = withTiming(-60, {
+      duration: 100
+    })
+  }
+
+  function showFloatingActionButton() {
+    fabBottomAnimation.value = withTiming(15, {
+      duration: 100
+    })
+  }
+
+  const onScrollHandler: OnScrollEventHandler = (event) => {
+    if (event.nativeEvent.velocity) {
+      if (event.nativeEvent.velocity.y > 0) {
+        hideFloatingActionButton()
+      } else {
+        showFloatingActionButton()
+      }
     }
   }
 
@@ -130,9 +167,9 @@ const Home = () => {
         {renderSectionList()}
       </View>
       <KeyboardAvoidingView>
-        <Pressable android_ripple={{ color: '#5A70E9', borderless: true, radius: 30 }} onPress={openModal} style={styles.floatingButton}>
+        <AnimatedPressable android_ripple={{ color: '#5A70E9', borderless: true, radius: 30 }} onPress={openModal} style={[styles.floatingButton, fabAnimatedStyle]}>
           <Image source={PlusSign} />
-        </Pressable>
+        </AnimatedPressable>
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
