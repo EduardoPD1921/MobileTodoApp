@@ -3,28 +3,40 @@ import {
   View,
   Text,
   StyleSheet,
-  Image
+  Image,
+  TouchableOpacity
 } from 'react-native'
 
 import { Todo } from '../types'
 
 import CheckMark from '../assets/images/checkmark.png'
 
-const TodoItem: React.FC<Todo> = ({ name, tag, isCompleted }) => {
+interface TodoItemType {
+  todo: Todo,
+  toggleTodoStatus: (uid: string, status: boolean) => void
+}
+
+const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus }) => {
   function getCheckMark() {
-    if (isCompleted) {
+    if (todo.isCompleted) {
       return <Image source={CheckMark} />
     }
   }
 
+  function triggerToggleTodoStatus() {
+    toggleTodoStatus(todo.uid, todo.isCompleted)
+  }
+
   return (
     <View style={styles.mainContainer}>
-      <View style={styles.checkboxContainer}>
-        {getCheckMark()}
-      </View>
+      <TouchableOpacity onPress={triggerToggleTodoStatus}>
+        <View style={styles.checkboxContainer}>
+          {getCheckMark()}
+        </View>
+      </TouchableOpacity>
       <View style={styles.todoTextInfoContainer}>
-        <Text style={styles.todoTitle}>{name}</Text>
-        <Text style={styles.todoTag}>{tag}</Text>
+        <Text style={styles.todoTitle}>{todo.name}</Text>
+        <Text style={styles.todoTag}>{todo.tag}</Text>
       </View>
     </View>
   )

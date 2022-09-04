@@ -89,7 +89,7 @@ const Home = () => {
             sections={groupedSections}
             keyExtractor={item => item.uid}
             stickySectionHeadersEnabled={true}
-            renderItem={({ item }) => <TodoItem uid={item.uid} name={item.name} tag={item.tag} isCompleted={item.isCompleted} />} 
+            renderItem={({ item }) => <TodoItem todo={item} toggleTodoStatus={toggleTodoStatus} />} 
             renderSectionHeader={({ section: { title } }) => (
               <Text style={styles.todoGroupTitle}>{title}</Text>
             )}
@@ -127,6 +127,30 @@ const Home = () => {
 
   function closeModal() {
     setIsVisible(false)
+  }
+
+  function toggleTodoStatus(uid: string, status: boolean) {
+    if (status) {
+      const copyFromState = completedTodos
+
+      const index = copyFromState.findIndex(todo => todo.uid == uid)
+      const removedTodo = copyFromState.splice(index, 1)[0]
+
+      removedTodo.isCompleted = false
+
+      setIncompletedTodos(prevState => [...prevState, removedTodo])
+      setCompletedTodos(copyFromState)
+    } else {
+      const copyFromState = incompletedTodos
+
+      const index = copyFromState.findIndex(todo => todo.uid == uid)
+      const removedTodo = copyFromState.splice(index, 1)[0]
+
+      removedTodo.isCompleted = true
+
+      setCompletedTodos(prevState => [...prevState, removedTodo])
+      setIncompletedTodos(copyFromState)
+    }
   }
 
   return (
