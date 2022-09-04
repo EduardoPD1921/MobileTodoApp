@@ -28,9 +28,9 @@ type OnScrollEventHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 const Home = () => {
-  const [todos, setTodos] = useState<Array<Todo>>([])
-  const [qtdCompletedTodos, setQtdCompletedTodos] = useState<number | null>(null)
-  const [qtdIncompletedTodos, setQtdIncompletedTodos] = useState<number | null>(null)
+  const [incompletedTodos, setIncompletedTodos] = useState<Array<Todo>>([])
+  const [completedTodos, setCompletedTodos] = useState<Array<Todo>>([])
+
   const [isVisible, setIsVisible] = useState(false)
 
   const fabBottomAnimation = useSharedValue(15)
@@ -42,33 +42,22 @@ const Home = () => {
   })
 
   useEffect(() => {
-    const getTodosAndQty = async () => {
+    const fetchTodosFromMemory = async () => {
       const currentTodosJson = await AsyncStorage.getItem('todos')
-
-      let completedCounter = 0
-      let incompletedCounter = 0
-
       if (currentTodosJson) {
         const currentTodosParsed: Array<Todo> = JSON.parse(currentTodosJson)
-        setTodos(currentTodosParsed)
-
         currentTodosParsed.forEach(todo => {
           if (todo.isCompleted) {
-            completedCounter++
+            setCompletedTodos(prevState => [...prevState, todo])
           } else {
-            incompletedCounter++
+            setIncompletedTodos(prevState => [...prevState, todo])
           }
         })
-      } else {
-        setTodos([])
       }
-
-      setQtdCompletedTodos(completedCounter)
-      setQtdIncompletedTodos(incompletedCounter)
     }
 
-    getTodosAndQty()
-  }, [todos])
+    fetchTodosFromMemory()
+  }, [])
 
   function getFormattedDate() {
     const date = new Date()
@@ -80,42 +69,27 @@ const Home = () => {
     return `${monthString} ${dayNumber}, ${yearNumber}`
   }
 
-  function getGroupedTodos() {
-    let incompleteTodo: Array<Todo> = []
-    let completedTodo: Array<Todo> = []
-
-    todos.forEach(todo => {
-      if (todo.isCompleted) {
-        completedTodo.push(todo)
-      } else {
-        incompleteTodo.push(todo)
-      }
-    })
-
-    const data = [
-      {
-        title: 'Incompleted',
-        data: incompleteTodo
-      },
-      {
-        title: 'Completed',
-        data: completedTodo
-      }
-    ]
-
-    return data
-  }
+  const groupedSections = [
+    {
+      title: 'Incompleted',
+      data: incompletedTodos
+    },
+    {
+      title: 'Completed',
+      data: completedTodos
+    }
+  ]
 
   function renderSectionList() {
-    if (todos.length > 0) {
+    if (incompletedTodos.length > 0 || completedTodos.length > 0) {
       return (
         <Animated.View entering={FadeInDown}>
           <SectionList
             onScroll={onScrollHandler}
-            sections={getGroupedTodos()}
-            keyExtractor={item => `${item.name}-${item.tag}`}
+            sections={groupedSections}
+            keyExtractor={item => item.uid}
             stickySectionHeadersEnabled={true}
-            renderItem={({ item }) => <TodoItem name={item.name} tag={item.tag} isCompleted={item.isCompleted} />} 
+            renderItem={({ item }) => <TodoItem uid={item.uid} name={item.name} tag={item.tag} isCompleted={item.isCompleted} />} 
             renderSectionHeader={({ section: { title } }) => (
               <Text style={styles.todoGroupTitle}>{title}</Text>
             )}
@@ -158,10 +132,10 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.mainContainer}>
       <DimBackground isVisible={isVisible} />
-      <CreateTodoModal closeModal={closeModal} isVisible={isVisible} />
+      <CreateTodoModal setIncompletedTodos={setIncompletedTodos} closeModal={closeModal} isVisible={isVisible} />
       <View style={styles.headerContainer}>
         <Text style={styles.dateText}>{getFormattedDate()}</Text>
-        <Text style={styles.counterText}>{qtdIncompletedTodos} incomplete, {qtdCompletedTodos} completed</Text>
+        <Text style={styles.counterText}>{incompletedTodos.length} incomplete, {completedTodos.length} completed</Text>
       </View>
       <View style={styles.mainContent}>
         {renderSectionList()}

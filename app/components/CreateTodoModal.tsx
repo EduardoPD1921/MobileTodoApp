@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { Dispatch, SetStateAction, useRef } from 'react'
 import {
   View,
   Text,
@@ -13,18 +13,20 @@ import {
 import { Todo } from '../types'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
+import uuid from 'react-native-uuid'
 import EvilIcon from 'react-native-vector-icons/EvilIcons'
 
 type Props = {
   isVisible: boolean,
-  closeModal: () => void
+  closeModal: () => void,
+  setIncompletedTodos: Dispatch<SetStateAction<Array<Todo>>> 
 }
 
-const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
+const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal, setIncompletedTodos }) => {
   const {  width, height } = Dimensions.get('window')
 
-  const todoData = useRef({
+  const todoData = useRef<Todo>({
+    uid: '',
     name: '',
     tag: '',
     isCompleted: false
@@ -35,11 +37,16 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
 
     if (currenTodosJson) {
       const currentTodosParsed: Array<Todo> = JSON.parse(currenTodosJson)
+      todoData.current.uid = uuid.v4().toString()
       currentTodosParsed.push(todoData.current)
 
       await AsyncStorage.setItem('todos', JSON.stringify(currentTodosParsed))
+      setIncompletedTodos(prevState => [...prevState, todoData.current])
     } else {
+      todoData.current.uid = uuid.v4().toString()
+
       await AsyncStorage.setItem('todos', JSON.stringify([todoData.current]))
+      setIncompletedTodos([todoData.current])
     }
 
     cleanInputsAndClose()
@@ -49,12 +56,22 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
 
   function cleanInputsAndClose() {
     todoData.current = {
+      uid: '',
       name: '',
       tag: '',
       isCompleted: false
     }
 
     closeModal()
+  }
+
+  async function debugCleanTodos() {
+    await AsyncStorage.removeItem('todos')
+  }
+
+  async function consoleAllTodos() {
+    const allTodos = await AsyncStorage.getItem('todos')
+    console.log(allTodos)
   }
 
   return (
@@ -80,6 +97,7 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal }) => {
           </View>
         </View>
         <View style={[styles.createButton, { width }]}>
+          <Button onPress={debugCleanTodos} title="Debug button" />
           <Button onPress={saveTodo} color='#5A70E9' title='Create' />
         </View>
       </View>
