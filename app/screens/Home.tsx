@@ -43,6 +43,11 @@ const Home = () => {
 
   useEffect(() => {
     const fetchTodosFromMemory = async () => {
+      // TODO:
+      // remover esses setStates
+      setIncompletedTodos([])
+      setCompletedTodos([])
+
       const currentTodosJson = await AsyncStorage.getItem('todos')
       if (currentTodosJson) {
         const currentTodosParsed: Array<Todo> = JSON.parse(currentTodosJson)
@@ -58,6 +63,17 @@ const Home = () => {
 
     fetchTodosFromMemory()
   }, [])
+
+  useEffect(() => {
+    const syncTodos = async () => {
+      const allTodos = [...incompletedTodos, ...completedTodos]
+      const jsonTodos = JSON.stringify(allTodos)
+  
+      await AsyncStorage.setItem('todos', jsonTodos)
+    }
+
+    syncTodos()
+  }, [incompletedTodos, completedTodos])
 
   function getFormattedDate() {
     const date = new Date()
@@ -85,13 +101,14 @@ const Home = () => {
       return (
         <Animated.View entering={FadeInDown}>
           <SectionList
+            style={{ marginBottom: 10 }}
             onScroll={onScrollHandler}
             sections={groupedSections}
             keyExtractor={item => item.uid}
             stickySectionHeadersEnabled={true}
             renderItem={({ item }) => <TodoItem todo={item} toggleTodoStatus={toggleTodoStatus} />} 
             renderSectionHeader={({ section: { title } }) => (
-              <Text style={styles.todoGroupTitle}>{title}</Text>
+              <Text style={[styles.todoGroupTitle, title == 'Completed' ? { marginTop: 20 } : {}]}>{title}</Text>
             )}
           />
         </Animated.View>
@@ -101,13 +118,13 @@ const Home = () => {
 
   function hideFloatingActionButton() {
     fabBottomAnimation.value = withTiming(-60, {
-      duration: 100
+      duration: 200
     })
   }
 
   function showFloatingActionButton() {
     fabBottomAnimation.value = withTiming(15, {
-      duration: 100
+      duration: 200
     })
   }
 

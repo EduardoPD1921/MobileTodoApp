@@ -35,8 +35,8 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus }) => {
         </View>
       </TouchableOpacity>
       <View style={styles.todoTextInfoContainer}>
-        <Text style={styles.todoTitle}>{todo.name}</Text>
-        <Text style={styles.todoTag}>{todo.tag}</Text>
+        <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>{todo.name}</Text>
+        <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>{todo.isCompleted ? '' : todo.tag}</Text>
       </View>
     </View>
   )
