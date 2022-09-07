@@ -5,12 +5,16 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Animated
+  Animated as NativeAnimated
 } from 'react-native'
 import { Swipeable }  from 'react-native-gesture-handler'
+
+import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { Todo } from '../types'
 
 import CheckMark from '../assets/images/checkmark.png'
+
+const AnimatedIcon = NativeAnimated.createAnimatedComponent(EvilIcons)
 
 interface TodoItemType {
   todo: Todo,
@@ -35,7 +39,7 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }
     }
   }
 
-  const LeftActions = (progress: Animated.AnimatedInterpolation, dragValue: Animated.AnimatedInterpolation) => {
+  const LeftActions = (progress: NativeAnimated.AnimatedInterpolation, dragValue: NativeAnimated.AnimatedInterpolation) => {
     const scale = dragValue.interpolate({
       inputRange: [0, 100],
       outputRange: [0.5, 1],
@@ -44,7 +48,7 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }
 
     return (
       <View style={styles.swipeActionContainer}>
-        <Animated.Text style={[styles.swipeActionText, { transform: [{ scale }] }]}>Delete</Animated.Text>
+        <AnimatedIcon size={30} name='trash' color='white' style={{ transform: [{ scale }] }} />
       </View>
     )
   }
@@ -52,10 +56,9 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }
   return (
     <Swipeable
       friction={2}
-      renderLeftActions={todo.isCompleted ? undefined : LeftActions}
+      renderLeftActions={todo.isCompleted ? LeftActions : LeftActions}
       childrenContainerStyle={{ backgroundColor: '#F8F8F8' }}
-      leftThreshold={50}
-      overshootLeft={false}
+      leftThreshold={200}
       onSwipeableOpen={direction => triggerDeleteTodo(direction)}
     >
       <View style={[styles.mainContainer, todo.isCompleted ? {} : { borderBottomColor: 'lightgray', borderBottomWidth: 1 }]}>
@@ -112,7 +115,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    padding: 20,
+    paddingLeft: 20,
     backgroundColor: '#dd2c00'
   },
   swipeActionText: {
