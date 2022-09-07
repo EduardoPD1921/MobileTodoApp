@@ -106,7 +106,7 @@ const Home = () => {
             sections={groupedSections}
             keyExtractor={item => item.uid}
             stickySectionHeadersEnabled={true}
-            renderItem={({ item }) => <TodoItem todo={item} toggleTodoStatus={toggleTodoStatus} />} 
+            renderItem={({ item }) => <TodoItem todo={item} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />} 
             renderSectionHeader={({ section: { title } }) => (
               <Text style={[styles.todoGroupTitle, title == 'Completed' ? { marginTop: 20 } : {}]}>{title}</Text>
             )}
@@ -167,6 +167,14 @@ const Home = () => {
 
       setCompletedTodos(prevState => [...prevState, removedTodo])
       setIncompletedTodos(copyFromState)
+    }
+  }
+
+  function deleteTodo(uid: string, status: boolean) {
+    if (status) {
+      setCompletedTodos(prevState => prevState.filter(todo => todo.uid != uid))
+    } else {
+      setIncompletedTodos(prevState => prevState.filter(todo => todo.uid != uid))
     }
   }
 

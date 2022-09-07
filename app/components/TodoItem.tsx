@@ -4,19 +4,21 @@ import {
   Text,
   StyleSheet,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Animated
 } from 'react-native'
-
+import { Swipeable }  from 'react-native-gesture-handler'
 import { Todo } from '../types'
 
 import CheckMark from '../assets/images/checkmark.png'
 
 interface TodoItemType {
   todo: Todo,
-  toggleTodoStatus: (uid: string, status: boolean) => void
+  toggleTodoStatus: (uid: string, status: boolean) => void,
+  deleteTodo: (uid: string, status: boolean) => void
 }
 
-const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus }) => {
+const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }) => {
   function getCheckMark() {
     if (todo.isCompleted) {
       return <Image source={CheckMark} />
@@ -27,18 +29,47 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus }) => {
     toggleTodoStatus(todo.uid, todo.isCompleted)
   }
 
-  return (
-    <View style={styles.mainContainer}>
-      <TouchableOpacity onPress={triggerToggleTodoStatus}>
-        <View style={styles.checkboxContainer}>
-          {getCheckMark()}
-        </View>
-      </TouchableOpacity>
-      <View style={styles.todoTextInfoContainer}>
-        <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>{todo.name}</Text>
-        <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>{todo.isCompleted ? '' : todo.tag}</Text>
+  function triggerDeleteTodo(direction: string) {
+    if (direction == 'left') {
+      deleteTodo(todo.uid, todo.isCompleted)
+    }
+  }
+
+  const LeftActions = (progress: Animated.AnimatedInterpolation, dragValue: Animated.AnimatedInterpolation) => {
+    const scale = dragValue.interpolate({
+      inputRange: [0, 100],
+      outputRange: [0.5, 1],
+      extrapolate: 'clamp'
+    })
+
+    return (
+      <View style={styles.swipeActionContainer}>
+        <Animated.Text style={[styles.swipeActionText, { transform: [{ scale }] }]}>Delete</Animated.Text>
       </View>
-    </View>
+    )
+  }
+
+  return (
+    <Swipeable
+      friction={2}
+      renderLeftActions={todo.isCompleted ? undefined : LeftActions}
+      childrenContainerStyle={{ backgroundColor: '#F8F8F8' }}
+      leftThreshold={50}
+      overshootLeft={false}
+      onSwipeableOpen={direction => triggerDeleteTodo(direction)}
+    >
+      <View style={[styles.mainContainer, todo.isCompleted ? {} : { borderBottomColor: 'lightgray', borderBottomWidth: 1 }]}>
+        <TouchableOpacity onPress={triggerToggleTodoStatus}>
+          <View style={styles.checkboxContainer}>
+            {getCheckMark()}
+          </View>
+        </TouchableOpacity>
+        <View style={styles.todoTextInfoContainer}>
+          <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>{todo.name}</Text>
+          <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>{todo.isCompleted ? '' : todo.tag}</Text>
+        </View>
+      </View>
+    </Swipeable>
   )
 }
 
@@ -75,6 +106,19 @@ const styles = StyleSheet.create({
     color: '#B9B9BE',
     fontSize: 17,
     marginLeft: 3
+  },
+  swipeActionContainer: {
+    display: 'flex',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    padding: 20,
+    backgroundColor: '#dd2c00'
+  },
+  swipeActionText: {
+    color: '#F8F8F8',
+    fontFamily: 'Inter-Medium',
+    fontSize: 12
   }
 })
 
