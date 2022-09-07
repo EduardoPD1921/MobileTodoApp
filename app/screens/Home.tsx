@@ -7,12 +7,11 @@ import {
   StyleSheet, 
   KeyboardAvoidingView, 
   Pressable,
-  SectionList,
   NativeScrollEvent,
   NativeSyntheticEvent
 } from 'react-native'
 
-import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming, FadeInDown, FadeOutDown, Layout } from 'react-native-reanimated'
 
 import { Todo } from '../types'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -22,6 +21,7 @@ import DimBackground from '../components/DimBackground'
 import TodoItem from '../components/TodoItem'
 
 import PlusSign from '../assets/images/plus-sign.png'
+import { ScrollView } from 'react-native-gesture-handler'
 
 type OnScrollEventHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => void
 
@@ -85,33 +85,27 @@ const Home = () => {
     return `${monthString} ${dayNumber}, ${yearNumber}`
   }
 
-  const groupedSections = [
-    {
-      title: 'Incompleted',
-      data: incompletedTodos
-    },
-    {
-      title: 'Completed',
-      data: completedTodos
-    }
-  ]
-
   function renderSectionList() {
     if (incompletedTodos.length > 0 || completedTodos.length > 0) {
       return (
-        <Animated.View entering={FadeInDown}>
-          <SectionList
-            style={{ marginBottom: 10 }}
-            onScroll={onScrollHandler}
-            sections={groupedSections}
-            keyExtractor={item => item.uid}
-            stickySectionHeadersEnabled={true}
-            renderItem={({ item }) => <TodoItem todo={item} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />} 
-            renderSectionHeader={({ section: { title } }) => (
-              <Text style={[styles.todoGroupTitle, title == 'Completed' ? { marginTop: 20 } : {}]}>{title}</Text>
-            )}
-          />
-        </Animated.View>
+        <ScrollView onScroll={onScrollHandler} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 70 }}>
+          <Text style={styles.todoGroupTitle}>Incompleted</Text>
+          {incompletedTodos.map(todo => {
+            return (
+              <Animated.View layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} key={todo.uid}>
+                <TodoItem todo={todo} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />
+              </Animated.View>
+            )
+          })}
+          <Animated.Text layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} style={styles.todoGroupTitle}>Completed</Animated.Text>
+          {completedTodos.map(todo => {
+            return (
+              <Animated.View layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} key={todo.uid}>
+                <TodoItem todo={todo} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />
+              </Animated.View>
+            )
+          })}
+        </ScrollView>
       )
     }
   }

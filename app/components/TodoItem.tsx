@@ -56,7 +56,7 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }
   return (
     <Swipeable
       friction={2}
-      renderLeftActions={todo.isCompleted ? LeftActions : LeftActions}
+      renderLeftActions={LeftActions}
       childrenContainerStyle={{ backgroundColor: '#F8F8F8' }}
       leftThreshold={200}
       onSwipeableOpen={direction => triggerDeleteTodo(direction)}
