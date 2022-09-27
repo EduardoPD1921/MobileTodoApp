@@ -65,10 +65,10 @@ const Home = () => {
   }, [])
 
   useEffect(() => {
-    const syncTodos = async () => {
+    const syncTodos =  async () => {
       const allTodos = [...incompletedTodos, ...completedTodos]
       const jsonTodos = JSON.stringify(allTodos)
-  
+
       await AsyncStorage.setItem('todos', jsonTodos)
     }
 
@@ -93,7 +93,7 @@ const Home = () => {
           {incompletedTodos.map(todo => {
             return (
               <Animated.View layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} key={todo.uid}>
-                <TodoItem todo={todo} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />
+                <TodoItem todo={todo} moveTodoPosition={moveTodoPosition} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />
               </Animated.View>
             )
           })}
@@ -101,7 +101,7 @@ const Home = () => {
           {completedTodos.map(todo => {
             return (
               <Animated.View layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} key={todo.uid}>
-                <TodoItem todo={todo} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />
+                <TodoItem todo={todo} moveTodoPosition={moveTodoPosition} toggleTodoStatus={toggleTodoStatus} deleteTodo={deleteTodo} />
               </Animated.View>
             )
           })}
@@ -169,6 +169,19 @@ const Home = () => {
       setCompletedTodos(prevState => prevState.filter(todo => todo.uid != uid))
     } else {
       setIncompletedTodos(prevState => prevState.filter(todo => todo.uid != uid))
+    }
+  }
+
+  function moveTodoPosition(uid: string, isUp: boolean) {
+    const copyFromState = [...incompletedTodos]
+    const todoIndex = copyFromState.findIndex(todo => todo.uid == uid)
+    const targetIndex = isUp ? todoIndex - 1 : todoIndex + 1
+
+    if (!(targetIndex < 0) && !(targetIndex > copyFromState.length - 1)) {
+      const toMoveTodo = copyFromState.splice(todoIndex, 1)[0]
+      copyFromState.splice(targetIndex, 0, toMoveTodo)
+
+      setIncompletedTodos(copyFromState)
     }
   }
 

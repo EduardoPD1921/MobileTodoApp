@@ -10,6 +10,8 @@ import {
 import { Swipeable }  from 'react-native-gesture-handler'
 
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
+import IonIcons from 'react-native-vector-icons/Ionicons'
+
 import { Todo } from '../types'
 
 import CheckMark from '../assets/images/checkmark.png'
@@ -19,10 +21,11 @@ const AnimatedIcon = NativeAnimated.createAnimatedComponent(EvilIcons)
 interface TodoItemType {
   todo: Todo,
   toggleTodoStatus: (uid: string, status: boolean) => void,
-  deleteTodo: (uid: string, status: boolean) => void
+  deleteTodo: (uid: string, status: boolean) => void,
+  moveTodoPosition: (uid: string, isUp: boolean) => void
 }
 
-const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }) => {
+const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, moveTodoPosition }) => {
   function getCheckMark() {
     if (todo.isCompleted) {
       return <Image source={CheckMark} />
@@ -36,6 +39,29 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }
   function triggerDeleteTodo(direction: string) {
     if (direction == 'left') {
       deleteTodo(todo.uid, todo.isCompleted)
+    }
+  }
+
+  function triggerMoveTodoUp() {
+    moveTodoPosition(todo.uid, true)
+  }
+
+  function triggerMoveTodoDown() {
+    moveTodoPosition(todo.uid, false)
+  }
+
+  function renderTodoActions() {
+    if (!todo.isCompleted) {
+      return (
+        <View style={styles.todoActionsContainer}>
+          <TouchableOpacity style={styles.todoActionsButton} onPress={triggerMoveTodoUp}>
+            <IonIcons name="ios-caret-up" color="black" size={20} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.todoActionsButton} onPress={triggerMoveTodoDown}>
+            <IonIcons name="ios-caret-down" color="black" size={20} />
+          </TouchableOpacity>
+        </View>
+      )
     }
   }
 
@@ -61,16 +87,28 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo }
       leftThreshold={200}
       onSwipeableOpen={direction => triggerDeleteTodo(direction)}
     >
-      <View style={[styles.mainContainer, todo.isCompleted ? {} : { borderBottomColor: 'lightgray', borderBottomWidth: 1 }]}>
-        <TouchableOpacity onPress={triggerToggleTodoStatus}>
-          <View style={styles.checkboxContainer}>
+      <View 
+        style={
+          [
+            styles.mainContainer,
+            todo.isCompleted ? {} : { borderBottomColor: 'lightgray', borderBottomWidth: 1, paddingBottom: 10 }
+          ]
+        }
+      >
+        <View style={styles.todoTextContainer}>
+          <TouchableOpacity style={styles.checkboxContainer} onPress={triggerToggleTodoStatus}>
             {getCheckMark()}
+          </TouchableOpacity>
+          <View style={styles.todoTextInfoContainer}>
+            <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>
+              {todo.name}
+            </Text>
+            <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>
+              {todo.isCompleted ? '' : todo.tag}
+            </Text>
           </View>
-        </TouchableOpacity>
-        <View style={styles.todoTextInfoContainer}>
-          <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>{todo.name}</Text>
-          <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>{todo.isCompleted ? '' : todo.tag}</Text>
         </View>
+        {renderTodoActions()}
       </View>
     </Swipeable>
   )
@@ -109,6 +147,18 @@ const styles = StyleSheet.create({
     color: '#B9B9BE',
     fontSize: 17,
     marginLeft: 3
+  },
+  todoTextContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    flex: 1
+  },
+  todoActionsContainer: {
+    alignItems: 'flex-end',
+    justifyContent: 'center'
+  },
+  todoActionsButton: {
+    margin: 5
   },
   swipeActionContainer: {
     display: 'flex',
