@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ScrollView,
   Animated as NativeAnimated
 } from 'react-native'
 import { Swipeable }  from 'react-native-gesture-handler'
@@ -100,12 +101,14 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, 
             {getCheckMark()}
           </TouchableOpacity>
           <View style={styles.todoTextInfoContainer}>
-            <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>
-              {todo.name}
-            </Text>
-            <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>
-              {todo.isCompleted ? '' : todo.tag}
-            </Text>
+            <ScrollView style={{ marginRight: 20 }} nestedScrollEnabled={true}>
+              <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>
+                {todo.name}
+              </Text>
+              <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>
+                {todo.isCompleted ? '' : todo.tag}
+              </Text>
+            </ScrollView>
           </View>
         </View>
         {renderTodoActions()}
@@ -118,7 +121,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     display: 'flex',
     flexDirection: 'row',
-    marginTop: 10
+    marginTop: 10,
+    maxHeight: 70
   },
   checkboxContainer: {
     display: 'flex',
@@ -138,6 +142,8 @@ const styles = StyleSheet.create({
     marginLeft: 15
   },
   todoTitle: {
+    flex: 1,
+    marginRight: 30,
     fontFamily: 'Inter-Medium',
     color: '#575767',
     fontSize: 24,
