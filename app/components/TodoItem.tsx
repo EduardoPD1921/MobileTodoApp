@@ -9,6 +9,7 @@ import {
   Animated as NativeAnimated
 } from 'react-native'
 import { Swipeable }  from 'react-native-gesture-handler'
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import IonIcons from 'react-native-vector-icons/Ionicons'
@@ -27,6 +28,8 @@ interface TodoItemType {
 }
 
 const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, moveTodoPosition }) => {
+  const actionsOpacity = useSharedValue(0)
+
   function getCheckMark() {
     if (todo.isCompleted) {
       return <Image source={CheckMark} />
@@ -50,18 +53,34 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, 
   function triggerMoveTodoDown() {
     moveTodoPosition(todo.uid, false)
   }
-
+  
+  function showTodoActions() {
+    setTimeout(() => {
+      actionsOpacity.value = withTiming(1, {
+        duration: 100
+      })
+    }, 500)
+  }
+  
   function renderTodoActions() {
     if (!todo.isCompleted) {
+      const actionsAnimationStyle = useAnimatedStyle(() => {
+        return {
+          opacity: actionsOpacity.value
+        }
+      })
+
+      showTodoActions()
+
       return (
-        <View style={styles.todoActionsContainer}>
+        <Animated.View style={[styles.todoActionsContainer, actionsAnimationStyle]}>
           <TouchableOpacity style={styles.todoActionsButton} onPress={triggerMoveTodoUp}>
             <IonIcons name="ios-caret-up" color="black" size={20} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.todoActionsButton} onPress={triggerMoveTodoDown}>
             <IonIcons name="ios-caret-down" color="black" size={20} />
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       )
     }
   }
