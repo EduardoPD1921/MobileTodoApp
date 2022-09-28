@@ -93,7 +93,7 @@ const Home = () => {
   function renderSectionList() {
     if (isLoading) {
       return (
-        <View style={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator color="#3F4EA0" />
         </View>
       )
@@ -234,6 +234,12 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginTop: 30,
     marginLeft: 20,
+  },
+  loadingContainer: {
+    display: 'flex',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   dateText: {
     fontFamily: 'Inter-Bold',
