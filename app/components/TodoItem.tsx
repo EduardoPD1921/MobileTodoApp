@@ -75,10 +75,10 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, 
       return (
         <Animated.View style={[styles.todoActionsContainer, actionsAnimationStyle]}>
           <TouchableOpacity style={styles.todoActionsButton} onPress={triggerMoveTodoUp}>
-            <IonIcons name="ios-caret-up" color="black" size={20} />
+            <IonIcons name="ios-caret-up" color="#616161" size={15} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.todoActionsButton} onPress={triggerMoveTodoDown}>
-            <IonIcons name="ios-caret-down" color="black" size={20} />
+            <IonIcons name="ios-caret-down" color="#616161" size={15} />
           </TouchableOpacity>
         </Animated.View>
       )

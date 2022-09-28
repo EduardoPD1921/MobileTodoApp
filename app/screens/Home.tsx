@@ -7,6 +7,7 @@ import {
   StyleSheet, 
   KeyboardAvoidingView, 
   Pressable,
+  ActivityIndicator,
   NativeScrollEvent,
   NativeSyntheticEvent
 } from 'react-native'
@@ -28,6 +29,8 @@ type OnScrollEventHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 const Home = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
   const [incompletedTodos, setIncompletedTodos] = useState<Array<Todo>>([])
   const [completedTodos, setCompletedTodos] = useState<Array<Todo>>([])
 
@@ -59,6 +62,8 @@ const Home = () => {
           }
         })
       }
+
+      setIsLoading(false)
     }
 
     fetchTodosFromMemory()
@@ -86,6 +91,14 @@ const Home = () => {
   }
 
   function renderSectionList() {
+    if (isLoading) {
+      return (
+        <View style={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator color="#3F4EA0" />
+        </View>
+      )
+    }
+
     if (incompletedTodos.length > 0 || completedTodos.length > 0) {
       return (
         <ScrollView onScroll={onScrollHandler} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 70 }}>
