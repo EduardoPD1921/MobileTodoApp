@@ -98,7 +98,7 @@ const CreateTodoModal: React.FC<Props> = ({ isVisible, closeModal, setIncomplete
         </View>
         <View style={[styles.createButton, { width }]}>
           {/* <Button onPress={debugCleanTodos} title="Debug button" /> */}
-          <Button onPress={saveTodo} color='#5A70E9' title='Create' />
+          <Button onPress={saveTodo} color='#3F4EA0' title='Create' />
         </View>
       </View>
     </Modal>
