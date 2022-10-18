@@ -4,3 +4,7 @@ export type Todo = {
   tag: string,
   isCompleted: boolean
 }
+
+export type NavigationRoutesType = {
+  Home: undefined;
+}

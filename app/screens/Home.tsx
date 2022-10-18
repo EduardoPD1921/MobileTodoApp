@@ -9,12 +9,22 @@ import {
   Pressable,
   ActivityIndicator,
   NativeScrollEvent,
-  NativeSyntheticEvent
+  NativeSyntheticEvent,
+  StatusBar,
 } from 'react-native'
 
-import Animated, { useAnimatedStyle, useSharedValue, withTiming, FadeInDown, FadeOutDown, Layout } from 'react-native-reanimated'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  FadeInDown,
+  FadeOutDown,
+  Layout 
+} from 'react-native-reanimated'
 
-import { Todo } from '../types'
+import IonIcon from 'react-native-vector-icons/Ionicons'
+
+import { Todo, NavigationRoutesType } from '../types'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import CreateTodoModal from '../components/CreateTodoModal'
@@ -23,12 +33,14 @@ import TodoItem from '../components/TodoItem'
 
 import PlusSign from '../assets/images/plus-sign.png'
 import { ScrollView } from 'react-native-gesture-handler'
+import { DrawerScreenProps } from '@react-navigation/drawer'
 
 type OnScrollEventHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => void
+type Props = DrawerScreenProps<NavigationRoutesType, 'Home'>
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-const Home = () => {
+const Home = (props: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const [incompletedTodos, setIncompletedTodos] = useState<Array<Todo>>([])
@@ -200,9 +212,13 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <StatusBar backgroundColor='#F8F8F8' barStyle='dark-content' />
       <DimBackground isVisible={isVisible} />
       <CreateTodoModal setIncompletedTodos={setIncompletedTodos} closeModal={closeModal} isVisible={isVisible} />
       <View style={styles.headerContainer}>
+        <Pressable onPress={() => props.navigation.openDrawer()} style={{ position: 'absolute', right: 20, top: 15, zIndex: 10 }} android_ripple={{ color: '#A3A3A3', borderless: true, radius: 15 }}>
+          <IonIcon size={20} name='ios-menu-sharp' />
+        </Pressable>
         <Text style={styles.dateText}>{getFormattedDate()}</Text>
         <Text style={styles.counterText}>{incompletedTodos.length} incomplete, {completedTodos.length} completed</Text>
       </View>
@@ -232,7 +248,6 @@ const styles = StyleSheet.create({
     marginBottom: 0
   },
   headerContainer: {
-    marginTop: 30,
     marginLeft: 20,
   },
   loadingContainer: {
