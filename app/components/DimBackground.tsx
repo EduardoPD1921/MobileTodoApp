@@ -5,8 +5,6 @@ import {
 } from 'react-native'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 
-import CloseSign from '../assets/images/close-sign.png'
-
 type Props = {
   isVisible: boolean
 }

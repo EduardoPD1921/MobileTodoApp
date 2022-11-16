@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react';
+import { Context } from '../context/ThemeContext';
 import { 
   View,
   Text, 
@@ -10,8 +11,8 @@ import {
   ActivityIndicator,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  StatusBar,
-} from 'react-native'
+  StatusBar
+} from 'react-native';
 
 import Animated, {
   useAnimatedStyle,
@@ -20,86 +21,84 @@ import Animated, {
   FadeInDown,
   FadeOutDown,
   Layout 
-} from 'react-native-reanimated'
+} from 'react-native-reanimated';
 
-import IonIcon from 'react-native-vector-icons/Ionicons'
+import IonIcon from 'react-native-vector-icons/Ionicons';
 
-import { Todo, NavigationRoutesType } from '../types'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Todo } from '../types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import CreateTodoModal from '../components/CreateTodoModal'
-import DimBackground from '../components/DimBackground'
-import TodoItem from '../components/TodoItem'
+import CreateTodoModal from '../components/CreateTodoModal';
+import DimBackground from '../components/DimBackground';
+import TodoItem from '../components/TodoItem';
 
-import PlusSign from '../assets/images/plus-sign.png'
-import { ScrollView } from 'react-native-gesture-handler'
-import { DrawerScreenProps } from '@react-navigation/drawer'
+import PlusSign from '../assets/images/plus-sign.png';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type OnScrollEventHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => void
-type Props = DrawerScreenProps<NavigationRoutesType, 'Home'>
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-const Home = (props: Props) => {
+const Home = () => {
+  const ctx = useContext(Context);
+
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [incompletedTodos, setIncompletedTodos] = useState<Array<Todo>>([]);
+  const [completedTodos, setCompletedTodos] = useState<Array<Todo>>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
-  const [incompletedTodos, setIncompletedTodos] = useState<Array<Todo>>([])
-  const [completedTodos, setCompletedTodos] = useState<Array<Todo>>([])
-
-  const [isVisible, setIsVisible] = useState(false)
-
-  const fabBottomAnimation = useSharedValue(15)
+  const fabBottomAnimation = useSharedValue(15);
 
   const fabAnimatedStyle = useAnimatedStyle(() => {
     return {
       bottom: fabBottomAnimation.value
     }
-  })
+  });
 
   useEffect(() => {
     const fetchTodosFromMemory = async () => {
       // TODO:
       // remover esses setStates
-      setIncompletedTodos([])
-      setCompletedTodos([])
+      setIncompletedTodos([]);
+      setCompletedTodos([]);
 
       const currentTodosJson = await AsyncStorage.getItem('todos')
       if (currentTodosJson) {
-        const currentTodosParsed: Array<Todo> = JSON.parse(currentTodosJson)
+        const currentTodosParsed: Array<Todo> = JSON.parse(currentTodosJson);
         currentTodosParsed.forEach(todo => {
           if (todo.isCompleted) {
-            setCompletedTodos(prevState => [...prevState, todo])
+            setCompletedTodos(prevState => [...prevState, todo]);
           } else {
-            setIncompletedTodos(prevState => [...prevState, todo])
+            setIncompletedTodos(prevState => [...prevState, todo]);
           }
         })
       }
 
-      setIsLoading(false)
+      setIsLoading(false);
     }
 
-    fetchTodosFromMemory()
-  }, [])
+    fetchTodosFromMemory();
+  }, []);
 
   useEffect(() => {
     const syncTodos =  async () => {
-      const allTodos = [...incompletedTodos, ...completedTodos]
-      const jsonTodos = JSON.stringify(allTodos)
+      const allTodos = [...incompletedTodos, ...completedTodos];
+      const jsonTodos = JSON.stringify(allTodos);
 
-      await AsyncStorage.setItem('todos', jsonTodos)
+      await AsyncStorage.setItem('todos', jsonTodos);
     }
 
-    syncTodos()
-  }, [incompletedTodos, completedTodos])
+    syncTodos();
+  }, [incompletedTodos, completedTodos]);
 
   function getFormattedDate() {
-    const date = new Date()
+    const date = new Date();
 
-    const monthString = date.toLocaleString('en-US', { month: 'long' })
-    const dayNumber = date.getDate()
-    const yearNumber = date.getFullYear()
+    const monthString = date.toLocaleString('en-US', { month: 'long' });
+    const dayNumber = date.getDate();
+    const yearNumber = date.getFullYear();
 
-    return `${monthString} ${dayNumber}, ${yearNumber}`
+    return `${monthString} ${dayNumber}, ${yearNumber}`;
   }
 
   function renderSectionList() {
@@ -216,9 +215,9 @@ const Home = (props: Props) => {
       <DimBackground isVisible={isVisible} />
       <CreateTodoModal setIncompletedTodos={setIncompletedTodos} closeModal={closeModal} isVisible={isVisible} />
       <View style={styles.headerContainer}>
-        <Pressable onPress={() => props.navigation.openDrawer()} style={{ position: 'absolute', right: 20, top: 15, zIndex: 10 }} android_ripple={{ color: '#A3A3A3', borderless: true, radius: 15 }}>
-          <IonIcon size={20} name='ios-menu-sharp' />
-        </Pressable>
+        {/* <Pressable style={{ position: 'absolute', right: 20, top: 15, zIndex: 10 }} android_ripple={{ color: '#A3A3A3', borderless: true, radius: 15 }}>
+          <IonIcon size={20} name='ios-settings-outline' />
+        </Pressable> */}
         <Text style={styles.dateText}>{getFormattedDate()}</Text>
         <Text style={styles.counterText}>{incompletedTodos.length} incomplete, {completedTodos.length} completed</Text>
       </View>
