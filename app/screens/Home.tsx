@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import SplashScreen from 'react-native-bootsplash';
 import { Context } from '../context/ThemeContext';
 import { 
   View,
@@ -56,6 +57,8 @@ const Home = () => {
   });
 
   useEffect(() => {
+    console.log(ctx?.theme);
+
     const fetchTodosFromMemory = async () => {
       // TODO:
       // remover esses setStates

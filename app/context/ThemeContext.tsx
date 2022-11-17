@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import SplashScreen from 'react-native-bootsplash';
 import { Appearance } from 'react-native';
 import { ThemeContextType } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,14 +18,17 @@ function ThemeProvider({ children }: Props) {
       const memoryTheme = await AsyncStorage.getItem('theme');
 
       if (memoryTheme) {
-        return setTheme(memoryTheme);
+        setTheme(memoryTheme);
+      } else {
+        const deviceTheme = Appearance.getColorScheme();
+        
+        if (deviceTheme) {
+          await AsyncStorage.setItem('theme', deviceTheme);
+          setTheme(deviceTheme);
+        }
       }
 
-      const deviceTheme = Appearance.getColorScheme();
-      if (deviceTheme) {
-        await AsyncStorage.setItem('theme', deviceTheme);
-        setTheme(deviceTheme);
-      }
+      SplashScreen.hide();
     }
 
     fetchThemeFromMemoryAndSet();
