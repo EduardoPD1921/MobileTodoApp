@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { Context } from '../context/ThemeContext';
 import {
   View,
   Text,
@@ -28,6 +29,8 @@ interface TodoItemType {
 }
 
 const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, moveTodoPosition }) => {
+  const ctx = useContext(Context);
+
   const actionsOpacity = useSharedValue(0)
 
   function getCheckMark() {
@@ -103,7 +106,9 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, 
     <Swipeable
       friction={2}
       renderLeftActions={LeftActions}
-      childrenContainerStyle={{ backgroundColor: '#F8F8F8' }}
+      childrenContainerStyle={
+        ctx?.theme == 'light' ? styles.lightBackground : styles.darkBackground
+      }
       leftThreshold={200}
       onSwipeableOpen={direction => triggerDeleteTodo(direction)}
     >
@@ -121,7 +126,13 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, 
           </TouchableOpacity>
           <View style={styles.todoTextInfoContainer}>
             <ScrollView style={{ marginRight: 20 }} nestedScrollEnabled={true}>
-              <Text style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]}>
+            {/* style={[styles.todoTitle, todo.isCompleted ? { color: '#B9B9BE' } : {}]} */}
+              <Text style={
+                [
+                  ctx?.theme == 'light' ? todoTitleLight : todoTitleDark,
+                  todo.isCompleted ? ctx?.theme == 'light' ? styles.completedTitleLight : styles.completedTitleDark : {}
+                ]
+              }>
                 {todo.name}
               </Text>
               <Text style={[styles.todoTag, todo.isCompleted ? { display: 'none' } : {}]}>
@@ -137,6 +148,35 @@ const TodoItem: React.FC<TodoItemType> = ({ todo, toggleTodoStatus, deleteTodo, 
 }
 
 const styles = StyleSheet.create({
+  baseTodoTitle: {
+    flex: 1,
+    marginRight: 30,
+    fontFamily: 'Inter-Medium',
+    // color: '#575767',
+    fontSize: 24,
+  },
+
+  lightBackground: {
+    backgroundColor: '#F8F8F8'
+  },
+  darkBackground: {
+    backgroundColor: '#141419'
+  },
+
+  titleLight: {
+    color: '#575767'
+  },
+  titleDark: {
+    color: '#DADADA'
+  },
+
+  completedTitleLight: {
+    color: '#B9B9BE'
+  },
+  completedTitleDark: {
+    color: '#575767'
+  },
+
   mainContainer: {
     display: 'flex',
     flexDirection: 'row',
@@ -159,13 +199,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     marginLeft: 15
-  },
-  todoTitle: {
-    flex: 1,
-    marginRight: 30,
-    fontFamily: 'Inter-Medium',
-    color: '#575767',
-    fontSize: 24,
   },
   todoTag: {
     fontFamily: 'Inter-SemiBold',
@@ -199,5 +232,8 @@ const styles = StyleSheet.create({
     fontSize: 12
   }
 })
+
+const todoTitleLight = [styles.baseTodoTitle, styles.titleLight];
+const todoTitleDark = [styles.baseTodoTitle, styles.titleDark];
 
 export default TodoItem

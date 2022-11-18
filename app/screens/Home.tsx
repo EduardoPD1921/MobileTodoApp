@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import SplashScreen from 'react-native-bootsplash';
 import { Context } from '../context/ThemeContext';
 import { 
   View,
@@ -14,7 +13,6 @@ import {
   NativeSyntheticEvent,
   StatusBar
 } from 'react-native';
-
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -23,8 +21,6 @@ import Animated, {
   FadeOutDown,
   Layout 
 } from 'react-native-reanimated';
-
-import IonIcon from 'react-native-vector-icons/Ionicons';
 
 import { Todo } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -35,6 +31,7 @@ import TodoItem from '../components/TodoItem';
 
 import PlusSign from '../assets/images/plus-sign.png';
 import { ScrollView } from 'react-native-gesture-handler';
+import ThemeSwitchButton from '../components/ThemeSwitchButton';
 
 type OnScrollEventHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => void
 
@@ -116,7 +113,9 @@ const Home = () => {
     if (incompletedTodos.length > 0 || completedTodos.length > 0) {
       return (
         <ScrollView onScroll={onScrollHandler} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 70 }}>
-          <Text style={styles.todoGroupTitle}>Incompleted</Text>
+          <Text style={
+            ctx?.theme == 'light' ? todoGroupTitleLight : todoGroupTitleDark
+          }>Incompleted</Text>
           {incompletedTodos.map(todo => {
             return (
               <Animated.View layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} key={todo.uid}>
@@ -124,7 +123,9 @@ const Home = () => {
               </Animated.View>
             )
           })}
-          <Animated.Text layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} style={styles.todoGroupTitle}>Completed</Animated.Text>
+          <Animated.Text layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} style={
+            ctx?.theme == 'light' ? todoGroupTitleLight : todoGroupTitleDark
+          }>Completed</Animated.Text>
           {completedTodos.map(todo => {
             return (
               <Animated.View layout={Layout.delay(50)} entering={FadeInDown} exiting={FadeOutDown} key={todo.uid}>
@@ -213,18 +214,22 @@ const Home = () => {
   }
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <SafeAreaView style={
+      ctx?.theme == 'light' ? mainContainerLight : mainContainerDark
+    }>
       <StatusBar backgroundColor='#F8F8F8' barStyle='dark-content' />
       <DimBackground isVisible={isVisible} />
       <CreateTodoModal setIncompletedTodos={setIncompletedTodos} closeModal={closeModal} isVisible={isVisible} />
       <View style={styles.headerContainer}>
-        {/* <Pressable style={{ position: 'absolute', right: 20, top: 15, zIndex: 10 }} android_ripple={{ color: '#A3A3A3', borderless: true, radius: 15 }}>
-          <IonIcon size={20} name='ios-settings-outline' />
-        </Pressable> */}
-        <Text style={styles.dateText}>{getFormattedDate()}</Text>
+        <ThemeSwitchButton />
+        <Text style={
+          ctx?.theme == 'light' ? dateTextLight : dateTextDark
+        }>{getFormattedDate()}</Text>
         <Text style={styles.counterText}>{incompletedTodos.length} incomplete, {completedTodos.length} completed</Text>
       </View>
-      <View style={styles.mainContent}>
+      <View style={
+        ctx?.theme == 'light' ? mainContentLight : mainContentDark
+      }>
         {renderSectionList()}
       </View>
       <KeyboardAvoidingView>
@@ -237,18 +242,49 @@ const Home = () => {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  baseMainContainer: {
     display: 'flex',
-    flex: 1,
-    backgroundColor: '#F8F8F8'
+    flex: 1
   },
-  mainContent: {
+  baseDateText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 30,
+  },
+  baseMainContent: {
     flex: 1,
     borderTopWidth: 2,
-    borderColor: '#E8E8E8',
     margin: 20,
     marginBottom: 0
   },
+  baseTodoGroupTitle: {
+    fontFamily: 'Inter-Bold',
+    color: '#575767',
+    fontSize: 18,
+    paddingTop: 10,
+    paddingBottom: 5
+  },
+
+  lightBackground: {
+    backgroundColor: '#F8F8F8'
+  },
+  darkBackground: {
+    backgroundColor: '#141419'
+  },
+
+  lightDate: {
+    color: '#0E0E11'
+  },
+  darkDate: {
+    color: '#DADADA'
+  },
+
+  lightMainContent: {
+    borderColor: '#E8E8E8'
+  },
+  darkMainContent: {
+    borderColor: '#575767'
+  },
+
   headerContainer: {
     marginLeft: 20,
   },
@@ -257,19 +293,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
-  },
-  dateText: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 30,
-    color: '#0E0E11'
-  },
-  todoGroupTitle: {
-    fontFamily: 'Inter-Bold',
-    color: '#575767',
-    fontSize: 18,
-    backgroundColor: '#F8F8F8',
-    paddingTop: 10,
-    paddingBottom: 5
   },
   floatingButton: {
     display: 'flex',
@@ -292,5 +315,17 @@ const styles = StyleSheet.create({
     marginTop: 5
   }
 })
+
+const mainContainerLight = [styles.baseMainContainer, styles.lightBackground];
+const mainContainerDark = [styles.baseMainContainer, styles.darkBackground];
+
+const dateTextLight = [styles.baseDateText, styles.lightDate];
+const dateTextDark = [styles.baseDateText, styles.darkDate];
+
+const mainContentLight = [styles.baseMainContent, styles.lightMainContent];
+const mainContentDark = [styles.baseMainContent, styles.darkMainContent];
+
+const todoGroupTitleLight = [styles.baseTodoGroupTitle, styles.lightBackground];
+const todoGroupTitleDark = [styles.baseTodoGroupTitle, styles.darkBackground];
 
 export default Home

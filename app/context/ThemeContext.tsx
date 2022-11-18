@@ -34,8 +34,18 @@ function ThemeProvider({ children }: Props) {
     fetchThemeFromMemoryAndSet();
   }, []);
 
+  async function toggleTheme() {
+    if (theme == 'light') {
+      setTheme('dark');
+      await AsyncStorage.setItem('theme', 'dark');
+    } else {
+      setTheme('light');
+      await AsyncStorage.setItem('theme', 'light');
+    }
+  }
+
   return (
-    <Context.Provider value={{ theme }}>
+    <Context.Provider value={{ theme, toggleTheme }}>
       {children}
     </Context.Provider>
   );
